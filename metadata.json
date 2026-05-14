@@ -1,0 +1,6 @@
+{
+  "name": "Slack Task Generator",
+  "description": "A productivity tool for PMs to generate standard Slack update messages, featuring quick phrases, dynamic item lists, and Google Sheets integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
