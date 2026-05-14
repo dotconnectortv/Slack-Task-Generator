@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Copy, Settings, CheckCheck, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Copy, Settings, CheckCheck, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -67,6 +67,7 @@ export default function App() {
 
   const [includeSignature, setIncludeSignature] = useState(false);
   const [signatureText, setSignatureText] = useState(DEFAULT_SIGNATURE);
+  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
 
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [projectDeadline, setProjectDeadline] = useState('');
@@ -130,15 +131,6 @@ export default function App() {
     setGasUrl(initialUrl);
     fetchData(initialUrl);
   }, []);
-
-  const handleProjectSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSelectedProject(value);
-    const p = projects.find(x => x.name === value);
-    if (p) {
-      setProjectDeadline(p.deadline);
-    }
-  };
 
   const addNextStep = () => {
     setNextSteps(prev => [...prev, { id: crypto.randomUUID(), item: '', memo: '', format: '' }]);
@@ -336,39 +328,101 @@ export default function App() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 relative">
                       <Label>Project</Label>
-                      <Input 
-                        list="project-list"
-                        value={selectedProject} 
-                        onChange={handleProjectSelect}
-                        placeholder="Type or select a project"
-                      />
-                      <datalist id="project-list">
-                        {projects.map(p => (
-                          <option key={p.name} value={p.name} />
-                        ))}
-                      </datalist>
+                      <div className="relative">
+                        <Input 
+                          value={selectedProject} 
+                          onChange={(e) => {
+                            setSelectedProject(e.target.value);
+                            const p = projects.find(x => x.name === e.target.value);
+                            if (p) setProjectDeadline(p.deadline);
+                          }}
+                          onFocus={() => setShowProjectDropdown(true)}
+                          onBlur={() => setTimeout(() => setShowProjectDropdown(false), 200)}
+                          placeholder="Type or select a project"
+                          className="pr-8"
+                        />
+                        {selectedProject && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedProject('');
+                              setProjectDeadline('');
+                              setShowProjectDropdown(false);
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none"
+                            tabIndex={-1}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      {showProjectDropdown && projects.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 shadow-md rounded-md max-h-48 overflow-y-auto">
+                          {projects
+                            .filter(p => !selectedProject || (typeof p.name === 'string' && p.name.toLowerCase().includes(selectedProject.toLowerCase())))
+                            .map(p => (
+                            <div 
+                              key={p.name} 
+                              className="px-3 py-2 hover:bg-neutral-100 cursor-pointer text-sm"
+                              onClick={() => {
+                                setSelectedProject(p.name);
+                                setProjectDeadline(p.deadline);
+                                setShowProjectDropdown(false);
+                              }}
+                            >
+                              {p.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2">
                       <Label>Project Deadline</Label>
-                      <Input 
-                        value={projectDeadline} 
-                        onChange={(e) => setProjectDeadline(e.target.value)}
-                        onFocus={() => setFocusTarget({ type: 'projectDeadline' })}
-                        placeholder="e.g. 5/19 all on air"
-                      />
+                      <div className="relative">
+                        <Input 
+                          value={projectDeadline} 
+                          onChange={(e) => setProjectDeadline(e.target.value)}
+                          onFocus={() => setFocusTarget({ type: 'projectDeadline' })}
+                          placeholder="e.g. 5/19 all on air"
+                          className="pr-8"
+                        />
+                        {projectDeadline && (
+                          <button
+                            type="button"
+                            onClick={() => setProjectDeadline('')}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none"
+                            tabIndex={-1}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label>Item Deadline</Label>
-                      <Input 
-                        value={itemDeadline} 
-                        onChange={(e) => setItemDeadline(e.target.value)}
-                        onFocus={() => setFocusTarget({ type: 'itemDeadline' })}
-                        placeholder="e.g. Before the end of this week 5/15"
-                      />
+                      <div className="relative">
+                        <Input 
+                          value={itemDeadline} 
+                          onChange={(e) => setItemDeadline(e.target.value)}
+                          onFocus={() => setFocusTarget({ type: 'itemDeadline' })}
+                          placeholder="e.g. Before the end of this week 5/15"
+                          className="pr-8"
+                        />
+                        {itemDeadline && (
+                          <button
+                            type="button"
+                            onClick={() => setItemDeadline('')}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none"
+                            tabIndex={-1}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
